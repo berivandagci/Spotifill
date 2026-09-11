@@ -20,14 +20,11 @@ struct SpotifyHomeView: View {
             ScrollView(.vertical) {
                 LazyVStack(spacing: 1, pinnedViews: [.sectionHeaders]) {
                     Section {
-                        VStack(spacing: 8) {
-                            NonLazyHGrid(columns: 2, alignment: .center, spacing: 10, items: products) { product in
-                                if let product {
-                                    SpotifyRecentlyCell(
-                                        imageName: product.firstImage,
-                                        title: product.title
-                                    )
-                                }
+                        VStack(spacing: 16) {
+                            recentsSection
+                            
+                            if let product = products.first {
+                            newReleasedSECTİON(product: product)
                             }
                         }
                         .padding(.horizontal, 16)
@@ -54,7 +51,7 @@ struct SpotifyHomeView: View {
     private func getData() async {
         do {
             currentUser = try await DatabaseHelper().getUsers().first
-            products = try await DatabaseHelper().getProducts()
+            products = try await Array(DatabaseHelper().getProducts().prefix(8))
         } catch {
             print("Veri çekerken hata oluştu: \(error)")
         }
@@ -90,6 +87,32 @@ struct SpotifyHomeView: View {
         }
         .padding(.vertical, 8)
         .background(Color.spotifyBlack)
+    }
+    
+    private var recentsSection: some View {
+        NonLazyVGrid(columns: 2, alignment: .center, spacing: 10, items: products) { product in
+            if let product {
+                SpotifyRecentlyCell(
+                    imageName: product.firstImage,
+                    title: product.title
+                )
+            }
+        }
+    }
+    private func newReleasedSECTİON (product: Product) -> some View {
+        SpotifyRelaseCell(
+            imageName: product.firstImage,
+            headline: product.brand,
+            subheadline: product.category.rawValue,
+            title: product.title,
+            subtitle: product.description,
+            onAddToPlaylistPressed: {
+               
+            },
+            onPlayPresed: {
+                print("Oynatılıyor: \(product.title)")
+            }
+        )
     }
 }
 

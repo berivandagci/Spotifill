@@ -10,7 +10,6 @@ import SwiftUI
 struct SpotifyRecentlyCell: View {
     var imageName: String = Constants.randomImage
     var title: String = "Some random title"
-    
     var body: some View {
         HStack(spacing: 16) {
             ImageLoaderView(urlString: imageName)
