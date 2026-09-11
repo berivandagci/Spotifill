@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import SwiftfulUI
 
 struct SpotifyHomeView: View {
     @State private var currentUser: User? = nil
     @State private var selectedCategory: SpotifyCategory? = nil
+    @State private var products: [Product] = []
     
     var body: some View {
         ZStack {
@@ -18,8 +20,21 @@ struct SpotifyHomeView: View {
             ScrollView(.vertical) {
                 LazyVStack(spacing: 1, pinnedViews: [.sectionHeaders]) {
                     Section {
+                        VStack(spacing: 8) {
+                            NonLazyHGrid(columns: 2, alignment: .center, spacing: 10, items: products) { product in
+                                if let product {
+                                    SpotifyRecentlyCell(
+                                        imageName: product.firstImage,
+                                        title: product.title
+                                    )
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        
                         ForEach(0..<20, id: \.self) { _ in
                             Rectangle()
+                                .fill(.spotifyDarkGray)
                                 .frame(width: 200, height: 200)
                         }
                     } header: {
@@ -38,8 +53,8 @@ struct SpotifyHomeView: View {
     
     private func getData() async {
         do {
-            let users = try await DatabaseHelper().getUsers()
-            currentUser = users.first
+            currentUser = try await DatabaseHelper().getUsers().first
+            products = try await DatabaseHelper().getProducts()
         } catch {
             print("Veri çekerken hata oluştu: \(error)")
         }
