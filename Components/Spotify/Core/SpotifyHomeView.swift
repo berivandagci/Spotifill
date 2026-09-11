@@ -9,41 +9,31 @@ import SwiftUI
 
 struct SpotifyHomeView: View {
     @State private var currentUser: User? = nil
+    @State private var selectedCategory: SpotifyCategory? = nil
     
     var body: some View {
         ZStack {
             Color.spotifyBlack.ignoresSafeArea()
             
-            VStack(spacing: 20) {
-                HStack {
-                    ImageLoaderView(urlString: currentUser?.image ?? "")
-                        .frame(width: 30, height: 30)
-                        .background(.spotifyWhite)
-                        .clipShape(Circle())
-                        .onTapGesture {
-                            
-                        }
-                    Spacer()
-                }
-                .padding(.horizontal, 16)
-                
-                ScrollView(.horizontal) {
-                    HStack(spacing: 8) {
-                        ForEach(0..<20) { _ in
+            ScrollView(.vertical) {
+                LazyVStack(spacing: 1, pinnedViews: [.sectionHeaders]) {
+                    Section {
+                        ForEach(0..<20, id: \.self) { _ in
                             Rectangle()
-                                .fill(Color.red)
-                                .frame(width: 10, height: 10)
+                                .frame(width: 200, height: 200)
                         }
+                    } header: {
+                        header
                     }
-                    .padding(.horizontal, 16)
                 }
-                
-                Spacer()
             }
+            .scrollIndicators(.hidden)
+            .clipped()
         }
         .task {
             await getData()
         }
+        .toolbar(.hidden, for: .navigationBar)
     }
     
     private func getData() async {
@@ -53,6 +43,38 @@ struct SpotifyHomeView: View {
         } catch {
             print("Veri çekerken hata oluştu: \(error)")
         }
+    }
+    
+    private var header: some View {
+        VStack(spacing: 20) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    if let currentUser {
+                        ImageLoaderView(urlString: currentUser.image)
+                            .frame(width: 30, height: 30)
+                            .background(.spotifyWhite)
+                            .clipShape(Circle())
+                            .onTapGesture {
+                                
+                            }
+                    }
+                    
+                    ForEach(SpotifyCategory.allCases, id: \.self) { category in
+                        SpotifyCategoryCell(
+                            title: category.rawValue.capitalized,
+                            isSelection: category == selectedCategory
+                        )
+                        .onTapGesture {
+                            selectedCategory = category
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+            .scrollIndicators(.hidden)
+        }
+        .padding(.vertical, 8)
+        .background(Color.spotifyBlack)
     }
 }
 
