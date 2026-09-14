@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 struct ProductWelcome: Codable {
     let products: [Product]
     let total: Int
@@ -44,9 +45,11 @@ struct Product: Codable, Identifiable {
     let meta: Meta
     let images: [String]
     let thumbnail: String
+    
     var firstImage: String {
         images.first ?? Constants.randomImage
     }
+    
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case title = "title"
@@ -70,6 +73,33 @@ struct Product: Codable, Identifiable {
         case meta = "meta"
         case images = "images"
         case thumbnail = "thumbnail"
+    }
+    
+    static var mock: Product {
+        Product(
+            id: 123,
+            title: "Mock Product",
+            description: "Mock description goes here.",
+            category: .beauty,
+            price: 9.99,
+            discountPercentage: 0.0,
+            rating: 5.0,
+            stock: 10,
+            tags: ["tag1"],
+            brand: "Mock Brand",
+            sku: "SKU123",
+            weight: 1,
+            dimensions: Dimensions(width: 1.0, height: 1.0, depth: 1.0),
+            warrantyInformation: "No warranty",
+            shippingInformation: "Ships in 1 week",
+            availabilityStatus: .inStock,
+            reviews: [],
+            returnPolicy: .noReturnPolicy,
+            minimumOrderQuantity: 1,
+            meta: Meta(createdAt: "", updatedAt: "", barcode: "", qrCode: ""),
+            images: [Constants.randomImage],
+            thumbnail: Constants.randomImage
+        )
     }
 }
 
@@ -137,9 +167,9 @@ struct Review: Codable {
         case reviewerEmail = "reviewerEmail"
     }
 }
+
 struct ProductRow: Identifiable {
     let id = UUID().uuidString
     let title: String
     let product: [Product]
-    
 }
