@@ -137,3 +137,9 @@ struct Review: Codable {
         case reviewerEmail = "reviewerEmail"
     }
 }
+struct ProductRow: Identifiable {
+    let id = UUID().uuidString
+    let title: String
+    let product: [Product]
+    
+}
