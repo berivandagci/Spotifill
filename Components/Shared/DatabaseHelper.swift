@@ -12,24 +12,21 @@ struct DatabaseHelper {
         guard let url = URL(string: "https://dummyjson.com/products") else {
             throw URLError(.badURL)
         }
-        
+         
         let (data, _) = try await URLSession.shared.data(from: url)
         let welcome = try JSONDecoder().decode(ProductWelcome.self, from: data)
-        
+         
         return welcome.products
     }
+    
     func getUsers() async throws -> [User] {
-            guard let url = URL(string: "https://dummyjson.com/users") else {
-                throw URLError(.badURL)
-            }
-            
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let welcome = try JSONDecoder().decode(UserWelcome.self, from: data)
-            
-            return welcome.users
+        guard let url = URL(string: "https://dummyjson.com/users") else {
+            throw URLError(.badURL)
         }
+         
+        let (data, _) = try await URLSession.shared.data(from: url)
+        let welcome = try JSONDecoder().decode(UserArray.self, from: data)
+         
+        return welcome.users
     }
-
-
-
-
+}
