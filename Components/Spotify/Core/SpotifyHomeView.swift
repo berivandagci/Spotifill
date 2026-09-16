@@ -4,10 +4,14 @@
 //
 //  Created by beri on 10.09.2026.
 //
+
 import SwiftUI
 import SwiftfulUI
+import SwiftfulRouting
 
 struct SpotifyHomeView: View {
+    @Environment(\.router) var router
+
     @State private var currentUser: User? = nil
     @State private var selectedCategory: SpotifyCategory? = nil
     @State private var products: [Product] = []
@@ -80,7 +84,7 @@ struct SpotifyHomeView: View {
                             .background(.spotifyWhite)
                             .clipShape(Circle())
                             .onTapGesture {
-                                
+                                router.dismissScreen()
                             }
                     }
                     
@@ -110,9 +114,17 @@ struct SpotifyHomeView: View {
                     title: product.title
                 )
                 .asButton(.press) {
-                    
+                    goToPlaylistView(product: product)
                 }
             }
+        }
+    }
+    
+    private func goToPlaylistView(product: Product) {
+        guard let currentUser else { return }
+         
+        router.showScreen(.push) { _ in
+            SpotifyPlayListView(product: product, user: currentUser)
         }
     }
     
@@ -127,9 +139,12 @@ struct SpotifyHomeView: View {
                 
             },
             onPlayPresed: {
-                print("Oynatılıyor: \(product.title)")
+                goToPlaylistView(product: product)
             }
         )
+        .asButton(.press) {
+            goToPlaylistView(product: product)
+        }
     }
     
     private var listRows: some View {
@@ -150,7 +165,7 @@ struct SpotifyHomeView: View {
                                     title: product.title
                                 )
                                 .asButton(.press) {
-                                    
+                                    goToPlaylistView(product: product)
                                 }
                             }
                         }
@@ -164,5 +179,7 @@ struct SpotifyHomeView: View {
 }
 
 #Preview {
-    SpotifyHomeView()
+    RouterView { _ in
+        SpotifyHomeView()
+    }
 }

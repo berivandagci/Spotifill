@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C177EC17305B233900A33DDC /* SwiftfulRouting in Frameworks */ = {isa = PBXBuildFile; productRef = C177EC16305B233900A33DDC /* SwiftfulRouting */; };
 		C1EC92253052E27400C4FBD1 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = C1EC92243052E27400C4FBD1 /* SDWebImageSwiftUI */; };
 		C1EC92373052F62A00C4FBD1 /* SwiftfulUI in Frameworks */ = {isa = PBXBuildFile; productRef = C1EC92363052F62A00C4FBD1 /* SwiftfulUI */; };
 		C1EC92393052F73300C4FBD1 /* SwiftfulUI in Frameworks */ = {isa = PBXBuildFile; productRef = C1EC92383052F73300C4FBD1 /* SwiftfulUI */; };
@@ -59,6 +60,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C1EC92373052F62A00C4FBD1 /* SwiftfulUI in Frameworks */,
+				C177EC17305B233900A33DDC /* SwiftfulRouting in Frameworks */,
 				C1EC92253052E27400C4FBD1 /* SDWebImageSwiftUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -123,6 +125,7 @@
 			packageProductDependencies = (
 				C1EC92243052E27400C4FBD1 /* SDWebImageSwiftUI */,
 				C1EC92363052F62A00C4FBD1 /* SwiftfulUI */,
+				C177EC16305B233900A33DDC /* SwiftfulRouting */,
 			);
 			productName = Components;
 			productReference = C1EC91F93052E13B00C4FBD1 /* Components.app */;
@@ -210,6 +213,7 @@
 			packageReferences = (
 				C1EC92233052E27400C4FBD1 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 				C1EC92353052F62A00C4FBD1 /* XCRemoteSwiftPackageReference "SwiftfulUI" */,
+				C177EC15305B233900A33DDC /* XCRemoteSwiftPackageReference "SwiftfulRouting" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C1EC91FA3052E13B00C4FBD1 /* Products */;
@@ -568,6 +572,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		C177EC15305B233900A33DDC /* XCRemoteSwiftPackageReference "SwiftfulRouting" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftfulThinking/SwiftfulRouting.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.2.2;
+			};
+		};
 		C1EC92233052E27400C4FBD1 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
@@ -587,6 +599,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		C177EC16305B233900A33DDC /* SwiftfulRouting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C177EC15305B233900A33DDC /* XCRemoteSwiftPackageReference "SwiftfulRouting" */;
+			productName = SwiftfulRouting;
+		};
 		C1EC92243052E27400C4FBD1 /* SDWebImageSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = C1EC92233052E27400C4FBD1 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
