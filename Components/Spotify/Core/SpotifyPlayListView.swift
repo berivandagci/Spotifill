@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import SwiftfulUI
+import SwiftfulRouting
 
 struct SpotifyPlayListView: View {
+    @Environment(\.router) var router
     var product: Product = .mock
     var user: User = .mock
     @State private var products: [Product] = []
@@ -23,7 +26,7 @@ struct SpotifyPlayListView: View {
                     PlaylistHeaderCell(
                         height: 250,
                         title: product.title,
-                        subtitle: product.brand ?? product.category.rawValue,
+                        subtitle: product.brand ?? product.category, // .rawValue silindi
                         imageName: product.thumbnail
                     )
                     .readingFrame { frame in
@@ -33,7 +36,7 @@ struct SpotifyPlayListView: View {
                     PlaylistDescriptionCell(
                         descriptionText: product.description,
                         userName: user.firstName,
-                        subheadline: product.category.rawValue,
+                        subheadline: product.category, // .rawValue silindi
                         onAddToPlaylistPressed: nil,
                         onSharedPressed: nil,
                         onDownLoadPressed: nil,
@@ -50,40 +53,20 @@ struct SpotifyPlayListView: View {
                             title: item.title,
                             subtitle: item.brand,
                             onCellPressed: {
-                                
+                                goToPlaylistView(product: item)
                             },
                             onEllipsisPressed: {
                                 
                             }
                         )
-                        .padding(.leading, 16)
+                        .padding(.horizontal, 16)
                     }
                 }
             }
             .scrollIndicators(.hidden)
             
-            ZStack {
-                Text(product.title)
-                    .font(.headline)
-                    .padding(.vertical, 20)
-                    .frame(maxWidth: .infinity)
-                    .opacity(showHeader ? 1 : 0)
-                
-                Image(systemName: "chevron.left")
-                    .font(.title3)
-                    .padding(10)
-                    .background(Color.spotifyGray.opacity(0.7))
-                    .clipShape(Circle())
-                    .onTapGesture {
-                        dismiss()
-                    }
-                    .padding(.leading, 16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .foregroundStyle(.spotifyWhite)
-            .background(showHeader ? Color.blue : Color.clear)
-            .animation(.easeInOut(duration: 0.2), value: showHeader)
-            .frame(maxHeight: .infinity, alignment: .top)
+            header
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
         .task {
             await getData()
@@ -93,13 +76,59 @@ struct SpotifyPlayListView: View {
     
     private func getData() async {
         do {
-            products = try await DatabaseHelper().getProducts()
+            let allProducts = try await DatabaseHelper().getProducts()
+            let filtered = allProducts.filter { $0.brand == product.brand }
+            products = filtered.isEmpty ? allProducts : filtered
         } catch {
+            let nsError = error as NSError
+            if nsError.domain == NSURLErrorDomain && nsError.code == -999 {
+                return
+            }
             print("Veri çekerken hata oluştu: \(error)")
         }
+    }
+    
+    private func goToPlaylistView(product: Product) {
+        router.showScreen(.push) { _ in
+            SpotifyPlayListView(product: product, user: user)
+        }
+    }
+    
+    private var header: some View {
+        VStack(spacing: 0) {
+            ZStack {
+                Text(product.title)
+                    .font(.headline)
+                    .foregroundStyle(.spotifyWhite)
+                    .frame(maxWidth: .infinity)
+                    .opacity(showHeader ? 1 : 0)
+                
+                HStack {
+                    Image(systemName: "chevron.left")
+                        .font(.title3)
+                        .foregroundStyle(.spotifyWhite)
+                        .padding(10)
+                        .background(Color.spotifyBlack.opacity(0.6))
+                        .clipShape(Circle())
+                        .onTapGesture {
+                            dismiss()
+                        }
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+            }
+            .frame(height: 44)
+            .padding(.top, 8)
+            .background(showHeader ? Color.spotifyDarkGray : Color.clear)
+            
+            Spacer()
+        }
+        .animation(.easeInOut(duration: 0.2), value: showHeader)
     }
 }
 
 #Preview {
-    SpotifyPlayListView(product: .mock)
+    RouterView { _ in
+        SpotifyPlayListView()
+    }
 }

@@ -7,7 +7,7 @@
 
 import SwiftUI
 import SwiftfulUI
-import SwiftfulRouting 
+import SwiftfulRouting
 import SwiftfulRecursiveUI
 
 struct ContentView: View {
@@ -17,7 +17,7 @@ struct ContentView: View {
         List {
             Button("OPEN SPOTIFY") {
                 router.showScreen(.fullScreenCover) { _ in
-                    SpotifyHomeView()
+                    SpotifyHomeView(viewModel: SpotifyHomeViewModel(router: router))
                 }
             }
         }

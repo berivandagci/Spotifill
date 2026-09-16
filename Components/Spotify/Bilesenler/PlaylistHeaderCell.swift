@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PlaylistHeaderCell: View {
-    var height: CFloat = 300
+    var height: CGFloat = 300 
     var title: String = "Some playlist title goes here"
     var subtitle: String = "Subtitle goes here"
     var imageName: String = Constants.randomImage
@@ -40,8 +40,7 @@ struct PlaylistHeaderCell: View {
                 ),
                 alignment: .bottom
             )
-            .asStretchyHeader(startingHeight: CGFloat(height))
-            .frame(height: 300)
+            .asStretchyHeader(startingHeight: height) // Doğrudan CGFloat verildi
     }
 }
 

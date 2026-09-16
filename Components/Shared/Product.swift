@@ -26,22 +26,22 @@ struct Product: Codable, Identifiable {
     let id: Int
     let title: String
     let description: String
-    let category: Category
+    let category: String // String yapıldı
     let price: Double
     let discountPercentage: Double
     let rating: Double
-    let stock: Int
+    let stock: Double
     let tags: [String]
     let brand: String?
     let sku: String
-    let weight: Int
+    let weight: Double
     let dimensions: Dimensions
     let warrantyInformation: String
     let shippingInformation: String
-    let availabilityStatus: AvailabilityStatus
+    let availabilityStatus: String // String yapıldı
     let reviews: [Review]
-    let returnPolicy: ReturnPolicy
-    let minimumOrderQuantity: Int
+    let returnPolicy: String // String yapıldı
+    let minimumOrderQuantity: Double
     let meta: Meta
     let images: [String]
     let thumbnail: String
@@ -80,39 +80,27 @@ struct Product: Codable, Identifiable {
             id: 123,
             title: "Mock Product",
             description: "Mock description goes here.",
-            category: .beauty,
+            category: "beauty",
             price: 9.99,
             discountPercentage: 0.0,
             rating: 5.0,
-            stock: 10,
+            stock: 10.0,
             tags: ["tag1"],
             brand: "Mock Brand",
             sku: "SKU123",
-            weight: 1,
+            weight: 1.0,
             dimensions: Dimensions(width: 1.0, height: 1.0, depth: 1.0),
             warrantyInformation: "No warranty",
             shippingInformation: "Ships in 1 week",
-            availabilityStatus: .inStock,
+            availabilityStatus: "In Stock",
             reviews: [],
-            returnPolicy: .noReturnPolicy,
-            minimumOrderQuantity: 1,
+            returnPolicy: "No return policy",
+            minimumOrderQuantity: 1.0,
             meta: Meta(createdAt: "", updatedAt: "", barcode: "", qrCode: ""),
             images: [Constants.randomImage],
             thumbnail: Constants.randomImage
         )
     }
-}
-
-enum AvailabilityStatus: String, Codable {
-    case inStock = "In Stock"
-    case lowStock = "Low Stock"
-}
-
-enum Category: String, Codable {
-    case beauty = "beauty"
-    case fragrances = "fragrances"
-    case furniture = "furniture"
-    case groceries = "groceries"
 }
 
 // MARK: - Dimensions
@@ -143,17 +131,9 @@ struct Meta: Codable {
     }
 }
 
-enum ReturnPolicy: String, Codable {
-    case noReturnPolicy = "No return policy"
-    case the30DaysReturnPolicy = "30 days return policy"
-    case the60DaysReturnPolicy = "60 days return policy"
-    case the7DaysReturnPolicy = "7 days return policy"
-    case the90DaysReturnPolicy = "90 days return policy"
-}
-
 // MARK: - Review
 struct Review: Codable {
-    let rating: Int
+    let rating: Double
     let comment: String
     let date: String
     let reviewerName: String

@@ -23,11 +23,9 @@ struct ImageTitleRowCell: View {
                 .lineLimit(2)
                 .padding(4)
         }
-        .frame(width: imageSize)
-        .background(Color.red)
-        
-    }
-}
+                .frame(width: imageSize)
+            }
+        }
 
 #Preview {
     ZStack {

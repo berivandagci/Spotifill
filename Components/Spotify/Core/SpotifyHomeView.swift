@@ -9,31 +9,76 @@ import SwiftUI
 import SwiftfulUI
 import SwiftfulRouting
 
+@Observable
+final class SpotifyHomeViewModel {
+    let router: AnyRouter?
+    var currentUser: User? = nil
+    var selectedCategory: SpotifyCategory? = nil
+    var products: [Product] = []
+    var productRows: [ProductRow] = []
+
+    init(router: AnyRouter? = nil) {
+        self.router = router
+    }
+
+    func getData() async {
+        do {
+            currentUser = try await DatabaseHelper().getUsers().first
+        } catch {
+            print("Kullanıcı çekilirken hata oluştu: \(error)")
+            currentUser = .mock
+        }
+        
+        do {
+            let allProducts = try await DatabaseHelper().getProducts()
+            products = Array(allProducts.prefix(8))
+            
+            var rows: [ProductRow] = []
+            let allBrands = Set(products.map({ $0.brand }))
+            for brand in allBrands {
+                let filteredProducts = products.filter({ $0.brand == brand })
+                rows.append(ProductRow(
+                    title: brand?.capitalized ?? "Diğer",
+                    product: filteredProducts
+                ))
+            }
+            productRows = rows
+        } catch {
+            let nsError = error as NSError
+            if nsError.domain == NSURLErrorDomain && nsError.code == -999 {
+                return
+            }
+            print("Ürünler çekilirken hata oluştu: \(error)")
+        }
+    }
+}
+
 struct SpotifyHomeView: View {
     @Environment(\.router) var router
+    @State private var viewModel: SpotifyHomeViewModel
 
-    @State private var currentUser: User? = nil
-    @State private var selectedCategory: SpotifyCategory? = nil
-    @State private var products: [Product] = []
-    @State private var productRows: [ProductRow] = []
+    init(viewModel: SpotifyHomeViewModel = SpotifyHomeViewModel()) {
+        self._viewModel = State(wrappedValue: viewModel)
+    }
 
     var body: some View {
         ZStack {
             Color.spotifyBlack.ignoresSafeArea()
             
             ScrollView(.vertical) {
-                LazyVStack(spacing: 24, pinnedViews: [.sectionHeaders]) {
+                LazyVStack(spacing: 1, pinnedViews: [.sectionHeaders]) {
                     Section {
                         VStack(spacing: 24) {
                             recentsSection
                             
-                            if let product = products.first {
-                                newReleasedSECTION(product: product)
+                            if let product = viewModel.products.first {
+                                newReleasedSection(product: product)
                             }
                             
                             listRows
                         }
                         .padding(.horizontal, 16)
+                        .padding(.top, 16)
                         
                         ForEach(0..<20, id: \.self) { _ in
                             Rectangle()
@@ -49,52 +94,33 @@ struct SpotifyHomeView: View {
             .clipped()
         }
         .task {
-            await getData()
+            await viewModel.getData()
         }
         .toolbar(.hidden, for: .navigationBar)
-    }
-    
-    private func getData() async {
-        do {
-            currentUser = try await DatabaseHelper().getUsers().first
-            products = try await Array(DatabaseHelper().getProducts().prefix(8))
-            
-            var rows: [ProductRow] = []
-            let allBrands = Set(products.map({ $0.brand }))
-            for brand in allBrands {
-                let filteredProducts = products.filter({ $0.brand == brand })
-                rows.append(ProductRow(
-                    title: brand?.capitalized ?? "Diğer",
-                    product: filteredProducts
-                ))
-            }
-            productRows = rows
-        } catch {
-            print("Veri çekerken hata oluştu: \(error)")
-        }
     }
     
     private var header: some View {
         VStack(spacing: 20) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    if let currentUser {
+                    if let currentUser = viewModel.currentUser {
                         ImageLoaderView(urlString: currentUser.image)
                             .frame(width: 30, height: 30)
                             .background(.spotifyWhite)
                             .clipShape(Circle())
                             .onTapGesture {
-                                router.dismissScreen()
+                                let activeRouter = viewModel.router ?? router
+                                activeRouter.dismissScreen()
                             }
                     }
                     
                     ForEach(SpotifyCategory.allCases, id: \.self) { category in
                         SpotifyCategoryCell(
                             title: category.rawValue.capitalized,
-                            isSelection: category == selectedCategory
+                            isSelection: category == viewModel.selectedCategory
                         )
                         .onTapGesture {
-                            selectedCategory = category
+                            viewModel.selectedCategory = category
                         }
                     }
                 }
@@ -107,7 +133,7 @@ struct SpotifyHomeView: View {
     }
     
     private var recentsSection: some View {
-        NonLazyVGrid(columns: 2, alignment: .center, spacing: 10, items: products) { product in
+        NonLazyVGrid(columns: 2, alignment: .center, spacing: 10, items: viewModel.products) { product in
             if let product {
                 SpotifyRecentlyCell(
                     imageName: product.firstImage,
@@ -121,24 +147,25 @@ struct SpotifyHomeView: View {
     }
     
     private func goToPlaylistView(product: Product) {
-        guard let currentUser else { return }
+        let userToPass = viewModel.currentUser ?? .mock
+        let activeRouter = viewModel.router ?? router
          
-        router.showScreen(.push) { _ in
-            SpotifyPlayListView(product: product, user: currentUser)
+        activeRouter.showScreen(.push) { _ in
+            SpotifyPlayListView(product: product, user: userToPass)
         }
     }
     
-    private func newReleasedSECTION(product: Product) -> some View {
-        SpotifyRelaseCell(
+    private func newReleasedSection(product: Product) -> some View {
+        SpotifyReleaseCell(
             imageName: product.firstImage,
             headline: product.brand,
-            subheadline: product.category.rawValue,
+            subheadline: product.category, // .rawValue buradan silindi
             title: product.title,
             subtitle: product.description,
             onAddToPlaylistPressed: {
                 
             },
-            onPlayPresed: {
+            onPlayPressed: {
                 goToPlaylistView(product: product)
             }
         )
@@ -150,7 +177,7 @@ struct SpotifyHomeView: View {
     private var listRows: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 16) {
-                ForEach(productRows, id: \.title) { row in
+                ForEach(viewModel.productRows, id: \.title) { row in
                     VStack(alignment: .leading, spacing: 12) {
                         Text(row.title)
                             .font(.title2)
@@ -179,7 +206,7 @@ struct SpotifyHomeView: View {
 }
 
 #Preview {
-    RouterView { _ in
-        SpotifyHomeView()
+    RouterView { router in
+        SpotifyHomeView(viewModel: SpotifyHomeViewModel(router: router))
     }
 }
