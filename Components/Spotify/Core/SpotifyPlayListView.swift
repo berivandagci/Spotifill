@@ -10,7 +10,7 @@ import SwiftUI
 struct SpotifyPlayListView: View {
     var product: Product = .mock
     var user: User = .mock
-    
+    @State private var products: [Product] = []
     
     var body: some View {
         ZStack {
@@ -36,9 +36,31 @@ struct SpotifyPlayListView: View {
                         onPlayPressed: nil
                     )
                     .padding(.horizontal, 16)
+                    
+                    ForEach(products) { item in
+                        SongRowCell(
+                            imageSize: 50,
+                            imageName: item.firstImage,
+                            title: item.title,
+                            subtitle: item.brand
+                        )
+                        .padding(.horizontal, 16)
+                    }
                 }
             }
             .scrollIndicators(.hidden)
+        }
+        .task {
+            await getData()
+        }
+        .toolbar(.hidden, for: .navigationBar)
+    }
+    
+    private func getData() async {
+        do {
+            products = try await DatabaseHelper().getProducts()
+        } catch {
+            print("Veri çekerken hata oluştu: \(error)")
         }
     }
 }
