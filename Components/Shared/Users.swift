@@ -61,20 +61,23 @@ struct User: Codable, Identifiable {
             UserInterest(iconName: nil, emoji: "🎧", text: "Music")
         ]
     }
+    var images: [String] {
+        ["https://picsum.photos/600/600", "https://picsum.photos/600/600", "https://picsum.photos/600/600"]
+    }
     
     static var mock: User {
         User(
             id: 444,
-            firstName: "Nick",
-            lastName: "Sarno",
+            firstName: "Berivan",
+            lastName: "Dağcı",
             age: 76,
-            email: "nick@x.dummyjson.com",
+            email: "beri@x.dummyjson.com",
             phone: "+1 202-555-0143",
-            username: "nick",
+            username: "beri",
             password: "password123",
             image: Constants.randomImage,
-            height: 172,
-            weight: 62.4
+            height: 165,
+            weight: 52.4
         )
     }
 }

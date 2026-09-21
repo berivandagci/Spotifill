@@ -16,7 +16,7 @@ struct BumbleHomeView: View {
                     .background(
                         Divider(), alignment: .bottom
                     )
-                
+                BumbleCardView()
                 Spacer()
             }
         }
