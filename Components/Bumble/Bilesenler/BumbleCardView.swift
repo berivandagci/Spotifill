@@ -19,6 +19,11 @@ struct BumbleCardView: View {
                     .frame(height: cardFrame.height)
                 
                 aboutMeSection
+                
+                
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 24)
+                myInterestSection
                     .padding(.horizontal, 24)
                     .padding(.vertical, 24)
             }
@@ -99,6 +104,21 @@ struct BumbleCardView: View {
         .padding(.horizontal, 24)
         .padding(.vertical, 24)
     }
+    private var myInterestSection : some View {
+        VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 12) {
+                sectionTitle(title: "My basics")
+                InterestPillGridView(interests: user.basics)
+            }
+            
+            VStack(alignment: .leading, spacing: 12) {
+                sectionTitle(title: "My interests")
+                InterestPillGridView(interests: user.interests)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
 }
 
 #Preview {

@@ -11,19 +11,16 @@ import SwiftfulUI
 struct InterestPillGridView: View {
     var interests: [UserInterest] = User.mock.interests
     
-    let columns = [
-        GridItem(.flexible(), spacing: 8),
-        GridItem(.flexible(), spacing: 8)
-    ]
-    
     var body: some View {
-        LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
-            ForEach(interests) { interest in
+        NonLazyVGrid(columns: 2, alignment: .leading, spacing: 8, items: interests) { interest in
+            if let interest {
                 InterestPillView(
                     iconName: interest.iconName,
                     emoji: interest.emoji,
                     text: interest.text
                 )
+            } else {
+                EmptyView()
             }
         }
     }
