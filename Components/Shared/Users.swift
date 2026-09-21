@@ -16,6 +16,13 @@ struct UserArray: Codable {
     }
 }
 
+struct UserInterest: Codable, Identifiable {
+    let id = UUID().uuidString
+    var iconName: String? = nil
+    var emoji: String? = nil
+    var text: String
+}
+
 struct User: Codable, Identifiable {
     let id: Int
     let firstName, lastName: String
@@ -34,18 +41,36 @@ struct User: Codable, Identifiable {
     }
     
     var aboutMe: String {
-        "This is a sentence about me that will look good on my profile"
+        "This is a sentence about me that will look good on my profile!"
+    }
+    
+    var basics: [UserInterest] {
+        [
+            UserInterest(iconName: "ruler", emoji: nil, text: "\(height)"),
+            UserInterest(iconName: "graduationcap", emoji: nil, text: education),
+            UserInterest(iconName: "wineglass", emoji: nil, text: "Socially"),
+            UserInterest(iconName: "moon.stars.fill", emoji: nil, text: "Virgo")
+        ]
+    }
+    
+    var interests: [UserInterest] {
+        [
+            UserInterest(iconName: nil, emoji: "🍕", text: "Foodie"),
+            UserInterest(iconName: nil, emoji: "✈️", text: "Travel"),
+            UserInterest(iconName: nil, emoji: "🏋️‍♂️", text: "Gym"),
+            UserInterest(iconName: nil, emoji: "🎧", text: "Music")
+        ]
     }
     
     static var mock: User {
         User(
-            id: 1,
-            firstName: "berivan",
-            lastName: "dağcı",
-            age: 24,
-            email: "berivandagcii@x.dummyjson.com",
+            id: 444,
+            firstName: "Nick",
+            lastName: "Sarno",
+            age: 76,
+            email: "nick@x.dummyjson.com",
             phone: "+1 202-555-0143",
-            username: "beri",
+            username: "nick",
             password: "password123",
             image: Constants.randomImage,
             height: 172,

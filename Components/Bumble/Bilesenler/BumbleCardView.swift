@@ -18,27 +18,9 @@ struct BumbleCardView: View {
                 headerCell
                     .frame(height: cardFrame.height)
                 
-                VStack(alignment: .leading, spacing: 12) {
-                    sectionTitle(title: "About me")
-                    Text(user.aboutMe)
-                        .font(.body)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.bumbleBlack)
-                    
-                    HStack(spacing: 8) {
-                        BumbleHeartView()
-                        Text("Send a Compliment")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(.bumbleYellow)
-                    .cornerRadius(32)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 24)
+                aboutMeSection
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 24)
             }
         }
         .scrollIndicators(.hidden)
@@ -92,6 +74,30 @@ struct BumbleCardView: View {
                 )
             )
         }
+    }
+    
+    private var aboutMeSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle(title: "About me")
+            Text(user.aboutMe)
+                .font(.body)
+                .fontWeight(.semibold)
+                .foregroundStyle(.bumbleBlack)
+            
+            HStack(spacing: 8) {
+                BumbleHeartView()
+                Text("Send a Compliment")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(.bumbleYellow)
+            .cornerRadius(32)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 24)
     }
 }
 
