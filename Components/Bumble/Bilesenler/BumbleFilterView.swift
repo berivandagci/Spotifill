@@ -40,7 +40,7 @@ struct BumbleFilterView: View {
 }
 
 fileprivate struct BumbleFilterViewPreview: View {
-    var option: [String] = ["Everyone", "Trending", "Hello"]
+    var options: [String] = ["Everyone", "Trending", "Hello"]
     @State private var selection: String = "Hello"
     
     var body: some View {
