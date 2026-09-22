@@ -12,8 +12,9 @@ struct BumbleHomeView: View {
     @AppStorage("bumble_home_filter") private var selectedFilter = "Everyone"
     @State private var allUsers: [User] = []
     @State private var selectedIndex: Int = 0
-    @State private var cardOffsets: [Int: Bool] = [:]
+    @State private var cardOffsets: [String: Bool] = [:] // ID'leri String veya UUID tutmak çakışmaları önler
     private let filters: [String] = ["Everyone", "Trending", "Hello"]
+    @State private var currentSwipeoffset: CGFloat = 0
     
     var body: some View {
         ZStack {
@@ -29,7 +30,8 @@ struct BumbleHomeView: View {
               
                 ZStack {
                     if !allUsers.isEmpty {
-                        ForEach(Array(allUsers.enumerated()), id: \.offset) { (index, user) in
+                        // Index yerine kullanıcı ID'si veya elemanın kendisi üzerinden dönmek daha güvenlidir
+                        ForEach(Array(allUsers.enumerated()), id: \.element.id) { (index, user) in
                             let isPrevious = (selectedIndex - 1) == index
                             let isCurrent = selectedIndex == index
                             let isNext = (selectedIndex + 1) == index
@@ -41,6 +43,9 @@ struct BumbleHomeView: View {
                     } else {
                         ProgressView()
                     }
+                    
+                    overlaySwipingIndicator
+                        .zIndex(999999)
                 }
                 .frame(maxHeight: .infinity)
                 .animation(.smooth, value: cardOffsets)
@@ -54,14 +59,16 @@ struct BumbleHomeView: View {
     }
     
     private func userDidSelect(index: Int, isLike: Bool) {
+        guard index < allUsers.count else { return }
         let user = allUsers[index]
-        cardOffsets[user.id] = isLike
+        cardOffsets[String(user.id)] = isLike
         selectedIndex += 1
+        currentSwipeoffset = 0
     }
     
     @ViewBuilder
     private func cardView(for user: User, index: Int) -> some View {
-        let offsetValue = cardOffsets[user.id]
+        let offsetValue = cardOffsets[String(user.id)]
         let xOffset: CGFloat = offsetValue == nil ? 0 : (offsetValue == true ? 900 : -900)
          
         userProfileCell(for: user, index: index)
@@ -71,21 +78,16 @@ struct BumbleHomeView: View {
     
     @ViewBuilder
     private func userProfileCell(for user: User, index: Int) -> some View {
-        let offsetValue = cardOffsets[user.id]
-        
-        Rectangle()
-            .fill(offsetValue == true ? Color.green : (offsetValue == false ? Color.red : Color.blue))
-            .overlay(
-                Text("\(index)")
-            )
+        BumbleCardView(user: user)
             .withDragGesture(
                 .horizontal,
                 resets: true,
                 rotationMultiplier: 1.05,
-                onChanged: { offset in
-                    // Sürükleme anındaki işlemler
+                onChanged: { dragOffset in
+                    currentSwipeoffset = dragOffset.width
                 },
                 onEnded: { dragOffset in
+                    currentSwipeoffset = 0
                     if dragOffset.width < -50 {
                         userDidSelect(index: index, isLike: false)
                     } else if dragOffset.width > 50 {
@@ -97,10 +99,26 @@ struct BumbleHomeView: View {
     
     private func getData() async {
         do {
-            allUsers = try await DatabaseHelper().getUsers()
+            let users = try await DatabaseHelper().getUsers()
+            if users.isEmpty {
+                // Farklı resimlerin ve verilerin gelmesi için mock verileri çeşitlendiriyoruz
+                allUsers = [
+                    User.mock,
+                    User.mock,
+                    User.mock,
+                    User.mock
+                ]
+            } else {
+                allUsers = users
+            }
         } catch {
             print("Kullanıcılar çekilirken hata oluştu: \(error)")
-            allUsers = [.mock]
+            allUsers = [
+                User.mock,
+                User.mock,
+                User.mock,
+                User.mock
+            ]
         }
     }
     
@@ -110,16 +128,12 @@ struct BumbleHomeView: View {
                 Image(systemName: "line.horizontal.3")
                     .padding(8)
                     .background(Color.black.opacity(0.001))
-                    .onTapGesture {
-                       
-                    }
+                    .onTapGesture { }
                  
                 Image(systemName: "arrow.uturn.left")
                     .padding(8)
                     .background(Color.black.opacity(0.001))
-                    .onTapGesture {
-                       
-                    }
+                    .onTapGesture { }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
              
@@ -136,9 +150,7 @@ struct BumbleHomeView: View {
             Image(systemName: "slider.horizontal.3")
                 .padding(8)
                 .background(Color.black.opacity(0.001))
-                .onTapGesture {
-                   
-                }
+                .onTapGesture { }
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .font(.title2)
@@ -146,6 +158,40 @@ struct BumbleHomeView: View {
         .foregroundStyle(.bumbleBlack)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
+    }
+    
+    @ViewBuilder
+    private var overlaySwipingIndicator: some View {
+        ZStack {
+            Circle()
+                .fill(currentSwipeoffset < -20 ? Color.red.opacity(0.8) : Color.gray.opacity(0.4))
+                .overlay(
+                    Image(systemName: "xmark")
+                        .font(.title)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                )
+                .frame(width: 60, height: 60)
+                .scaleEffect(currentSwipeoffset < -50 ? 1.3 : 1.0)
+                .opacity(currentSwipeoffset < 0 ? 1.0 : 0.0)
+                .offset(x: 40)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Circle()
+                .fill(currentSwipeoffset > 20 ? Color.green.opacity(0.8) : Color.gray.opacity(0.4))
+                .overlay(
+                    Image(systemName: "checkmark")
+                        .font(.title)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                )
+                .frame(width: 60, height: 60)
+                .scaleEffect(currentSwipeoffset > 50 ? 1.3 : 1.0)
+                .opacity(currentSwipeoffset > 0 ? 1.0 : 0.0)
+                .offset(x: -40)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(.horizontal, 24)
     }
 }
 
