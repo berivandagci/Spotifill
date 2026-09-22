@@ -12,7 +12,7 @@ struct BumbleHomeView: View {
     @AppStorage("bumble_home_filter") private var selectedFilter = "Everyone"
     @State private var allUsers: [User] = []
     @State private var selectedIndex: Int = 0
-    
+    @State private var cardOffsets: [Int: Bool] = [:]
     private let filters: [String] = ["Everyone", "Trending", "Hello"]
     
     var body: some View {
@@ -30,30 +30,12 @@ struct BumbleHomeView: View {
                 ZStack {
                     if !allUsers.isEmpty {
                         ForEach(Array(allUsers.enumerated()), id: \.offset) { (index, user) in
+                            let isPrevious = (selectedIndex - 1) == index
                             let isCurrent = selectedIndex == index
                             let isNext = (selectedIndex + 1) == index
-                            let isPrevious = (selectedIndex - 1) == index
                             
                             if isPrevious || isCurrent || isNext {
-                                Rectangle()
-                                    .fill(Color.red)
-                                    .overlay(
-                                        Text("\(index)")
-                                            .font(.largeTitle)
-                                            .foregroundStyle(.white)
-                                    )
-                                    .zIndex(Double(allUsers.count - index))
-                                    .withDragGesture(
-                                        onChanged: { offset in
-                                            // Sürükleme sırasında yapılacak işlemler
-                                        },
-                                        onEnded: { offset in
-                                            // Sürükleme bittiğinde kartı geçme mantığı
-                                            if abs(offset.width) > 100 {
-                                                selectedIndex += 1
-                                            }
-                                        }
-                                    )
+                                cardView(for: user, index: index)
                             }
                         }
                     } else {
@@ -61,6 +43,7 @@ struct BumbleHomeView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
+                .animation(.smooth, value: cardOffsets)
             }
             .padding(8)
             .task {
@@ -68,6 +51,48 @@ struct BumbleHomeView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
         }
+    }
+    
+    private func userDidSelect(index: Int, isLike: Bool) {
+        let user = allUsers[index]
+        cardOffsets[user.id] = isLike
+        selectedIndex += 1
+    }
+    
+    @ViewBuilder
+    private func cardView(for user: User, index: Int) -> some View {
+        let offsetValue = cardOffsets[user.id]
+        let xOffset: CGFloat = offsetValue == nil ? 0 : (offsetValue == true ? 900 : -900)
+         
+        userProfileCell(for: user, index: index)
+            .zIndex(Double(allUsers.count - index))
+            .offset(x: xOffset)
+    }
+    
+    @ViewBuilder
+    private func userProfileCell(for user: User, index: Int) -> some View {
+        let offsetValue = cardOffsets[user.id]
+        
+        Rectangle()
+            .fill(offsetValue == true ? Color.green : (offsetValue == false ? Color.red : Color.blue))
+            .overlay(
+                Text("\(index)")
+            )
+            .withDragGesture(
+                .horizontal,
+                resets: true,
+                rotationMultiplier: 1.05,
+                onChanged: { offset in
+                    // Sürükleme anındaki işlemler
+                },
+                onEnded: { dragOffset in
+                    if dragOffset.width < -50 {
+                        userDidSelect(index: index, isLike: false)
+                    } else if dragOffset.width > 50 {
+                        userDidSelect(index: index, isLike: true)
+                    }
+                }
+            )
     }
     
     private func getData() async {
