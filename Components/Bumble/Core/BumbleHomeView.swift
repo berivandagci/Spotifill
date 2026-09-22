@@ -99,26 +99,12 @@ struct BumbleHomeView: View {
     
     private func getData() async {
         do {
-            let users = try await DatabaseHelper().getUsers()
-            if users.isEmpty {
-                // Farklı resimlerin ve verilerin gelmesi için mock verileri çeşitlendiriyoruz
-                allUsers = [
-                    User.mock,
-                    User.mock,
-                    User.mock,
-                    User.mock
-                ]
-            } else {
-                allUsers = users
-            }
+            // DummyJSON'dan tüm kullanıcıları ve resimleri dinamik olarak çeker
+            allUsers = try await DatabaseHelper().getUsers()
         } catch {
             print("Kullanıcılar çekilirken hata oluştu: \(error)")
-            allUsers = [
-                User.mock,
-                User.mock,
-                User.mock,
-                User.mock
-            ]
+            // Hata durumunda en azından ekranda mock görünsün diye
+            allUsers = [User.mock]
         }
     }
     
