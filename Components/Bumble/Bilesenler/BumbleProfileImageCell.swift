@@ -47,6 +47,13 @@ struct BumbleProfileImageCell: View {
 }
 
 #Preview {
-    BumbleProfileImageCell()
-        .padding()
-}
+    VStack {
+        BumbleProfileImageCell()
+
+        BumbleProfileImageCell(percentageRemaining: 1)
+
+        BumbleProfileImageCell(percentageRemaining: 0)
+
+        BumbleProfileImageCell(hasNewMessage: false)
+
+    }}
