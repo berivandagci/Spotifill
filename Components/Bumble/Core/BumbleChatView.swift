@@ -6,8 +6,10 @@
 //
 
 import SwiftUI
+import SwiftfulRouting
 
 struct BumbleChatsView: View {
+    @Environment(\.router) var router
     @State private var allUsers: [User] = []
 
     var body: some View {
@@ -19,10 +21,8 @@ struct BumbleChatsView: View {
                     .padding(16)
                  
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: 20) { //
+                    VStack(spacing: 20) {
                         matchQueueSection
-                        
-                  
                         chatsSection
                     }
                 }
@@ -38,8 +38,20 @@ struct BumbleChatsView: View {
     private var header: some View {
         HStack(spacing: 0) {
             Image(systemName: "line.horizontal.3")
+                .padding(8)
+                .background(Color.black.opacity(0.001))
+                .onTapGesture {
+                    router.dismissScreen()
+                }
+            
             Spacer(minLength: 0)
+            
             Image(systemName: "magnifyingglass")
+                .padding(8)
+                .background(Color.black.opacity(0.001))
+                .onTapGesture {
+                    // Arama aksiyonu buraya eklenebilir
+                }
         }
         .font(.title)
         .fontWeight(.medium)
@@ -56,7 +68,7 @@ struct BumbleChatsView: View {
             }
             .font(.headline)
             .padding(.horizontal, 16)
-            
+             
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 16) {
                     ForEach(allUsers) { user in
@@ -66,7 +78,10 @@ struct BumbleChatsView: View {
                                 percentageRemaining: Double.random(in: 0...1),
                                 hasNewMessage: Bool.random()
                             )
-                            
+                            .onTapGesture {
+                                // Match queue içindeki profile tıklama aksiyonu
+                            }
+                             
                             Text(user.firstName)
                                 .font(.caption)
                                 .fontWeight(.medium)
@@ -86,7 +101,7 @@ struct BumbleChatsView: View {
                 .font(.headline)
                 .foregroundStyle(.bumbleBlack)
                 .padding(.horizontal, 16)
-            
+             
             LazyVStack(spacing: 12) {
                 ForEach(allUsers) { user in
                     HStack(spacing: 12) {
@@ -97,29 +112,34 @@ struct BumbleChatsView: View {
                             hasNewMessage: false
                         )
                         .frame(width: 65, height: 65)
-                        
+                         
                         // İsim ve Son Mesaj
                         VStack(alignment: .leading, spacing: 4) {
                             Text(user.firstName)
                                 .font(.subheadline)
                                 .fontWeight(.bold)
                                 .foregroundStyle(.bumbleBlack)
-                            
+                             
                             Text("Send a message or reply to their profile...")
                                 .font(.footnote)
                                 .foregroundStyle(.bumbleGray)
                                 .lineLimit(1)
                         }
-                        
+                         
                         Spacer()
-                        
-                        // Zaman / Bildirim İkonu
+                         
+                        // Zaman / Bildirim İkonalanı
                         Text("12:45")
                             .font(.caption2)
                             .foregroundStyle(.bumbleGray)
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 4)
+                    .contentShape(Rectangle()) // Tüm satırın tıklanabilir olmasını sağlar
+                    .onTapGesture {
+                        // Örnek: Sohbet hücresine tıklandığında yapılacak yönlendirme
+                        // router.showScreen(.push) { _ in BumbleChatDetailView(user: user) }
+                    }
                 }
             }
         }
@@ -138,5 +158,7 @@ struct BumbleChatsView: View {
 }
 
 #Preview {
-    BumbleChatsView()
+    RouterView { _ in
+        BumbleChatsView()
+    }
 }

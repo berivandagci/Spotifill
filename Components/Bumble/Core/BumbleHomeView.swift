@@ -7,15 +7,17 @@
 
 import SwiftUI
 import SwiftfulUI
+import SwiftfulRouting
 
 struct BumbleHomeView: View {
+    @Environment(\.router) var router
     @AppStorage("bumble_home_filter") private var selectedFilter = "Everyone"
     @State private var allUsers: [User] = []
     @State private var selectedIndex: Int = 0
     @State private var cardOffsets: [String: CGFloat] = [:] // Her kartın anlık X koordinatını tutar
     private let filters: [String] = ["Everyone", "Trending", "Hello"]
     @State private var currentSwipeoffset: CGFloat = 0
-    
+     
     var body: some View {
         ZStack {
             Color.bumbleWhite.ignoresSafeArea()
@@ -34,7 +36,7 @@ struct BumbleHomeView: View {
                             let isPrevious = (selectedIndex - 1) == index
                             let isCurrent = selectedIndex == index
                             let isNext = (selectedIndex + 1) == index
-                            
+                           
                             if isPrevious || isCurrent || isNext {
                                 cardView(for: user, index: index)
                             }
@@ -55,28 +57,28 @@ struct BumbleHomeView: View {
             .toolbar(.hidden, for: .navigationBar)
         }
     }
-    
+     
     private func userDidSelect(index: Int, isLike: Bool) {
         guard index < allUsers.count else { return }
         selectedIndex += 1
         currentSwipeoffset = 0
     }
-     
+      
     @ViewBuilder
     private func cardView(for user: User, index: Int) -> some View {
         let isCurrent = selectedIndex == index
-         
+          
         userProfileCell(for: user, index: index)
             .zIndex(Double(allUsers.count - index))
             .allowsHitTesting(isCurrent) // Sadece en üstteki kart tıklanabilir/sürüklenebilir olur
     }
-     
+      
     @ViewBuilder
     private func userProfileCell(for user: User, index: Int) -> some View {
         let userId = String(user.id)
         let xOffset = cardOffsets[userId] ?? 0
         let isCurrent = selectedIndex == index
-        
+          
         BumbleCardView(user: user)
             .offset(x: xOffset)
             .withDragGesture(
@@ -91,7 +93,7 @@ struct BumbleHomeView: View {
                 onEnded: { dragOffset in
                     guard isCurrent else { return }
                     currentSwipeoffset = 0
-                    
+                   
                     withAnimation(.smooth) {
                         if dragOffset.width < -50 {
                             cardOffsets[userId] = -1000 // Sola uçur
@@ -106,7 +108,7 @@ struct BumbleHomeView: View {
                 }
             )
     }
-     
+      
     private func getData() async {
         do {
             allUsers = try await DatabaseHelper().getUsers()
@@ -115,19 +117,26 @@ struct BumbleHomeView: View {
             allUsers = [User.mock]
         }
     }
-     
+      
     private var header: some View {
         HStack(spacing: 0) {
             HStack(spacing: 12) {
+                // Sol menü ikonuna tıklandığında Chats ekranına yönlendirir
                 Image(systemName: "line.horizontal.3")
                     .padding(8)
                     .background(Color.black.opacity(0.001))
-                    .onTapGesture { }
+                    .onTapGesture {
+                        router.showScreen(.push) { _ in
+                            BumbleChatsView()
+                        }
+                    }
                  
                 Image(systemName: "arrow.uturn.left")
                     .padding(8)
                     .background(Color.black.opacity(0.001))
-                    .onTapGesture { }
+                    .onTapGesture {
+                        // Geri alma (Rewind) özelliği istenirse buraya eklenebilir
+                    }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
              
@@ -153,7 +162,7 @@ struct BumbleHomeView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
     }
-     
+      
     @ViewBuilder
     private var overlaySwipingIndicator: some View {
         ZStack {
@@ -190,5 +199,7 @@ struct BumbleHomeView: View {
 }
 
 #Preview {
-    BumbleHomeView()
+    RouterView { _ in
+        BumbleHomeView()
+    }
 }
