@@ -29,7 +29,7 @@ struct User: Codable, Identifiable {
     let age: Int
     let email, phone, username, password: String
     let image: String
-    let height: Int
+    let height: Double // DÜZELTİLDİ: DummyJSON'dan gelebilecek ondalıklı boy değerleri için Double yapıldı
     let weight: Double
     
     var work: String {
@@ -46,7 +46,7 @@ struct User: Codable, Identifiable {
     
     var basics: [UserInterest] {
         [
-            UserInterest(iconName: "ruler", emoji: nil, text: "\(height)"),
+            UserInterest(iconName: "ruler", emoji: nil, text: "\(Int(height))"), // Görselde tamsayı görünmesi için Int'e cast edildi
             UserInterest(iconName: "graduationcap", emoji: nil, text: education),
             UserInterest(iconName: "wineglass", emoji: nil, text: "Socially"),
             UserInterest(iconName: "moon.stars.fill", emoji: nil, text: "Virgo")
@@ -76,7 +76,7 @@ struct User: Codable, Identifiable {
             username: "beri",
             password: "password123",
             image: Constants.randomImage,
-            height: 165,
+            height: 165.0,
             weight: 52.4
         )
     }

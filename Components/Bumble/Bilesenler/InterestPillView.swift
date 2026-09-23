@@ -11,11 +11,11 @@ struct InterestPillView: View {
     var iconName: String? = "heart.fill"
     var emoji: String? = "👍🏻"
     var text: String = "Graduate Degree"
+    
     var body: some View {
         HStack(spacing: 4) {
             if let iconName {
                 Image(systemName: iconName)
-                
             } else if let emoji {
                 Text(emoji)
             }
@@ -28,12 +28,14 @@ struct InterestPillView: View {
         .foregroundStyle(.bumbleBlack)
         .background(.bumbleYellow)
         .cornerRadius(32)
-        
     }
 }
 
 #Preview {
-    InterestPillView(iconName: nil)
-
-    InterestPillView()
+    VStack(spacing: 12) {
+        InterestPillView(iconName: "heart.fill", emoji: nil, text: "Heart Icon")
+        InterestPillView(iconName: nil, emoji: "🔥", text: "Emoji Pill")
+        InterestPillView(iconName: nil, emoji: nil, text: "Text Only")
+    }
+    .padding()
 }

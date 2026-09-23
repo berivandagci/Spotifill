@@ -12,7 +12,7 @@ struct BumbleHomeView: View {
     @AppStorage("bumble_home_filter") private var selectedFilter = "Everyone"
     @State private var allUsers: [User] = []
     @State private var selectedIndex: Int = 0
-    @State private var cardOffsets: [String: Bool] = [:] // ID'leri String veya UUID tutmak çakışmaları önler
+    @State private var cardOffsets: [String: CGFloat] = [:] // Her kartın anlık X koordinatını tutar
     private let filters: [String] = ["Everyone", "Trending", "Hello"]
     @State private var currentSwipeoffset: CGFloat = 0
     
@@ -27,10 +27,9 @@ struct BumbleHomeView: View {
                     .background(
                         Divider(), alignment: .bottom
                     )
-              
+             
                 ZStack {
                     if !allUsers.isEmpty {
-                        // Index yerine kullanıcı ID'si veya elemanın kendisi üzerinden dönmek daha güvenlidir
                         ForEach(Array(allUsers.enumerated()), id: \.element.id) { (index, user) in
                             let isPrevious = (selectedIndex - 1) == index
                             let isCurrent = selectedIndex == index
@@ -43,12 +42,11 @@ struct BumbleHomeView: View {
                     } else {
                         ProgressView()
                     }
-                    
+                     
                     overlaySwipingIndicator
                         .zIndex(999999)
                 }
                 .frame(maxHeight: .infinity)
-                .animation(.smooth, value: cardOffsets)
             }
             .padding(8)
             .task {
@@ -60,54 +58,64 @@ struct BumbleHomeView: View {
     
     private func userDidSelect(index: Int, isLike: Bool) {
         guard index < allUsers.count else { return }
-        let user = allUsers[index]
-        cardOffsets[String(user.id)] = isLike
         selectedIndex += 1
         currentSwipeoffset = 0
     }
-    
+     
     @ViewBuilder
     private func cardView(for user: User, index: Int) -> some View {
-        let offsetValue = cardOffsets[String(user.id)]
-        let xOffset: CGFloat = offsetValue == nil ? 0 : (offsetValue == true ? 900 : -900)
+        let isCurrent = selectedIndex == index
          
         userProfileCell(for: user, index: index)
             .zIndex(Double(allUsers.count - index))
-            .offset(x: xOffset)
+            .allowsHitTesting(isCurrent) // Sadece en üstteki kart tıklanabilir/sürüklenebilir olur
     }
-    
+     
     @ViewBuilder
     private func userProfileCell(for user: User, index: Int) -> some View {
+        let userId = String(user.id)
+        let xOffset = cardOffsets[userId] ?? 0
+        let isCurrent = selectedIndex == index
+        
         BumbleCardView(user: user)
+            .offset(x: xOffset)
             .withDragGesture(
                 .horizontal,
-                resets: true,
+                resets: true, // Kendi otomatik sıfırlamasını kapatıp kontrolü tamamen aldık
                 rotationMultiplier: 1.05,
                 onChanged: { dragOffset in
+                    guard isCurrent else { return }
                     currentSwipeoffset = dragOffset.width
+                    cardOffsets[userId] = dragOffset.width
                 },
                 onEnded: { dragOffset in
+                    guard isCurrent else { return }
                     currentSwipeoffset = 0
-                    if dragOffset.width < -50 {
-                        userDidSelect(index: index, isLike: false)
-                    } else if dragOffset.width > 50 {
-                        userDidSelect(index: index, isLike: true)
+                    
+                    withAnimation(.smooth) {
+                        if dragOffset.width < -50 {
+                            cardOffsets[userId] = -1000 // Sola uçur
+                            userDidSelect(index: index, isLike: false)
+                        } else if dragOffset.width > 50 {
+                            cardOffsets[userId] = 1000  // Sağa uçur
+                            userDidSelect(index: index, isLike: true)
+                        } else {
+                            cardOffsets[userId] = 0     // Yeterince çekmediyse yerine geri getir
+                        }
                     }
                 }
             )
     }
-    
+     
     private func getData() async {
         do {
-            // DummyJSON'dan tüm kullanıcıları ve resimleri dinamik olarak çeker
             allUsers = try await DatabaseHelper().getUsers()
         } catch {
             print("Kullanıcılar çekilirken hata oluştu: \(error)")
-            // Hata durumunda en azından ekranda mock görünsün diye
             allUsers = [User.mock]
         }
     }
-    
+     
     private var header: some View {
         HStack(spacing: 0) {
             HStack(spacing: 12) {
@@ -145,7 +153,7 @@ struct BumbleHomeView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
     }
-    
+     
     @ViewBuilder
     private var overlaySwipingIndicator: some View {
         ZStack {
@@ -162,7 +170,7 @@ struct BumbleHomeView: View {
                 .opacity(currentSwipeoffset < 0 ? 1.0 : 0.0)
                 .offset(x: 40)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            
+             
             Circle()
                 .fill(currentSwipeoffset > 20 ? Color.green.opacity(0.8) : Color.gray.opacity(0.4))
                 .overlay(

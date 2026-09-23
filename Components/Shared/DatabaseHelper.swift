@@ -14,10 +14,10 @@ struct DatabaseHelper {
         }
          
         let (data, _) = try await URLSession.shared.data(from: url)
-        
+         
         let decoder = JSONDecoder()
         decoder.nonConformingFloatDecodingStrategy = .convertFromString(positiveInfinity: "+Infinity", negativeInfinity: "-Infinity", nan: "NaN")
-        
+         
         let welcome = try decoder.decode(ProductWelcome.self, from: data)
          
         return welcome.products
@@ -29,7 +29,11 @@ struct DatabaseHelper {
         }
          
         let (data, _) = try await URLSession.shared.data(from: url)
-        let welcome = try JSONDecoder().decode(UserArray.self, from: data)
+        
+        let decoder = JSONDecoder()
+        decoder.nonConformingFloatDecodingStrategy = .convertFromString(positiveInfinity: "+Infinity", negativeInfinity: "-Infinity", nan: "NaN")
+        
+        let welcome = try decoder.decode(UserArray.self, from: data)
          
         return welcome.users
     }
