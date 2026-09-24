@@ -135,10 +135,9 @@ struct BumbleChatsView: View {
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 4)
-                    .contentShape(Rectangle()) // Tüm satırın tıklanabilir olmasını sağlar
+                    .contentShape(Rectangle()) 
                     .onTapGesture {
-                        // Örnek: Sohbet hücresine tıklandığında yapılacak yönlendirme
-                        // router.showScreen(.push) { _ in BumbleChatDetailView(user: user) }
+                        
                     }
                 }
             }
