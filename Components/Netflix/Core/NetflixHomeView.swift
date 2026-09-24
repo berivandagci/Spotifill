@@ -8,11 +8,22 @@
 import SwiftUI
 
 struct NetflixHomeView: View {
+    @State private var filters = FilterModel.mockArray
+    @State private var selectedFilter: FilterModel? = nil
     var body: some View {
         ZStack {
             Color.netflixBlack.ignoresSafeArea()
             VStack(spacing: 8) {
-                header // Düzeltildi: Doğru değişken ismi çağrıldı
+                header
+                NetflixFilterBarView(
+                    selectedFilter: $selectedFilter, // Binding ($) ile bağlandı
+                    onFilterPressed: {
+                        // Filtreye tıklandığında yapılacaklar
+                    },
+                    onMarkPressed: {
+                        selectedFilter = nil
+                    }
+                )
                     .padding(.horizontal, 16)
                 Spacer()
             }
@@ -20,7 +31,7 @@ struct NetflixHomeView: View {
         .foregroundStyle(.netflixWhite)
     }
     
-    private var header: some View { // Düzeltildi: 'headeer' yerine 'header' yapıldı
+    private var header: some View {
         HStack(spacing: 8) {
             Text("For You")
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -29,17 +40,17 @@ struct NetflixHomeView: View {
             HStack(spacing: 16) {
                 Image(systemName: "tv.badge.wifi")
                     .onTapGesture {
-                        // Televizyon/yayın ikonuna basıldığında yapılacak işlemler
+                      
                     }
                 
                 Image(systemName: "magnifyingglass")
                     .onTapGesture {
-                        // Arama ikonuna basıldığında yapılacak işlemler
+                       
                     }
             }
             .font(.title)
         }
-        .padding(.horizontal, 16) // Kenarlardan daha şık durması için hafif bir boşluk eklenebilir
+        .padding(.horizontal, 16) 
     }
 }
 
